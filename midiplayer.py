@@ -2,6 +2,7 @@
 import pygame
 import pygame.midi
 import time
+import os
 
 class MidiPlayer:
     def __init__(self):
@@ -30,6 +31,12 @@ class MidiPlayer:
             elif isinstance(event, tuple):
                 self.play_note(event[0], duration=event[1])
 
+    def play_midi_file(self, midi_file):
+        pygame.mixer.music.load(midi_file)
+        pygame.mixer.music.play()
+        while pygame.mixer.music.get_busy():
+            pygame.time.Clock().tick(10)
+
     def close(self):
         del self.player
         pygame.midi.quit()
@@ -37,9 +44,19 @@ class MidiPlayer:
 if __name__ == "__main__":
     player = MidiPlayer()
     
-    # Example usage
-    player.play_note(60)  # Play middle C
-    player.play_chord([60, 64, 67])  # Play C major chord
-    player.play_sequence([60, 62, 64, (65, 1), [60, 64, 67]])
+    print("Available MIDI files:")
+    midi_files = [f for f in os.listdir() if f.endswith('.mid')]
+    for i, file in enumerate(midi_files):
+        print(f"{i + 1}. {file}")
+    
+    choice = int(input("Enter the number of the MIDI file you want to play: ")) - 1
+    
+    if 0 <= choice < len(midi_files):
+        print(f"Playing {midi_files[choice]}...")
+        player.play_midi_file(midi_files[choice])
+    else:
+        print("Invalid choice. Playing default sequence.")
+        player.play_sequence([60, 62, 64, (65, 1), [60, 64, 67]])
     
     player.close()
+
